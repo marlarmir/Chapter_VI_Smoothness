@@ -1,0 +1,77 @@
+import rhinoscriptsyntax as rs
+import Rhino as rh
+import math
+
+def DiV(num, den):
+    div=num[0]/den, num[1]/den, num[2]/den, num[3]/den, num[4]/den, num[5]/den
+    return div
+def PRoDuCT(num1, vector):
+    prod=num1*vector[0], num1*vector[1], num1*vector[2], num1*vector[3], num1*vector[4], num1*vector[5]
+    return prod
+def SuM(vector1, vector2):
+    sum= (vector1[0]+vector2[0], vector1[1]+vector2[1], vector1[2]+vector2[2], vector1[3]+vector2[3], vector1[4]+vector2[4], vector1[5]+vector2[5])
+    return sum
+def SuBTRaCT(vector1, vector2):
+    sub= (vector1[0]-vector2[0], vector1[1]-vector2[1], vector1[2]-vector2[2], vector1[3]-vector2[3], vector1[4]-vector2[4], vector1[5]-vector2[5])
+    return sub
+def SPHeRe (M, r):
+    sgm0= (1+(M[0]*2+M[1]2+M[2]2)-(r*2))/2
+    sgm1= (1-(M[0]*2+M[1]2+M[2]2)+(r*2))/2
+    sgm2= M[0]
+    sgm3= M[1]
+    sgm4= M[2]
+    sgm5= r
+    sgm= (sgm0, sgm1, sgm2, sgm3, sgm4, sgm5)
+    return sgm
+def aBS(vector):
+    abs=math.sqrt(-vector[0]*2+vector[1]2+vector[2]2+vector[3]2+vector[4]2-vector[5]*2)
+    return abs
+def iNNeRPRoDuCT(a, b): 
+    iP= -(a[0]*b[0])+(a[1]*b[1])+(a[2]*b[2])+(a[3]*b[3])+(a[4]*b[4])-(a[5]*b[5])
+    return iP
+def emin(sgm1, sgm2, sgm3):
+    A=B=1
+    try:
+        C=(-1-2*(iNNeRPRoDuCT(sigm1, sigm2)))/(2*((iNNeRPRoDuCT(sigm1, sigm3))+(iNNeRPRoDuCT(sigm2, sigm3))))
+    except ZeroDivisionError:
+        A=C=1
+        try:
+            B=(-1-2*(iNNeRPRoDuCT(sigm1, sigm3)))/(2*((iNNeRPRoDuCT(sigm1, sigm2))+(iNNeRPRoDuCT(sigm1, sigm3))))
+        except ZeroDivisionError:
+            B=C=1
+            A=(-1-2*(iNNeRPRoDuCT(sigm1, sigm3)))/(2*((iNNeRPRoDuCT(sigm1, sigm2))+(iNNeRPRoDuCT(sigm1, sigm3))))
+    em=SuM(SuM(PRoDuCT(A, sgm1), PRoDuCT(B, sgm2)),PRoDuCT(C, sgm3)) 
+    return em
+def eplus1(sgm1, sgm2, emin):
+    sigmhead1=DiV(sgm1, (iNNeRPRoDuCT(sgm1, emin)))
+    sigmhead2=DiV(sgm2, (iNNeRPRoDuCT(sgm2, emin)))
+    eplushead1=SuBTRaCT(sigmhead1, sigmhead2)
+    eplus1=DiV(eplushead1, aBS(eplushead1))
+    return eplus1
+def eplus2(sgm1, sgm3, emin, eplus1):
+    sigmhead1=DiV(sgm1, (iNNeRPRoDuCT(sgm1, emin)))
+    sigmhead3=DiV(sgm3, (iNNeRPRoDuCT(sgm3, emin)))
+    eplushead2=SuBTRaCT(sigmhead1, sigmhead3)
+    eplusheadd2=SuBTRaCT(eplushead2,PRoDuCT(iNNeRPRoDuCT(eplushead2, eplus1), eplus1))
+    eplus2=DiV(eplusheadd2, aBS(eplusheadd2))
+    return eplus2
+
+#p=(0,0,0,0,0,1) and o=(0.5, 0.5, 0, 0, 0, 0)
+q=(1, -1, 0, 0, 0, 0)
+
+sigm1= SPHeRe (M1, r1)
+sigm2= SPHeRe (M2, r2)
+sigm3= SPHeRe (M3, r3)
+e_=emin(sigm1, sigm2, sigm3)
+epl=eplus1(sigm1, sigm2, e_)
+ep2=eplus2(sigm1, sigm3, e_, epl)
+du=((math.pi)-0)/200
+
+listSpheres=[]
+for i in range (0, 200, 1):
+    sigmfu=SuM(SuM(e_,PRoDuCT(math.cos(i*du), epl)),PRoDuCT(math.sin(i*du), ep2))
+    sigm=PRoDuCT(-1, DiV(sigmfu,iNNeRPRoDuCT(sigmfu, q)))
+    center=rs.coerce3dpoint(rs.AddPoint(sigm[2], sigm[3], sigm[4]))
+    radius=sigm[5]
+    sphere=rs.AddSphere(center, radius)
+    listSpheres.append(sphere)
